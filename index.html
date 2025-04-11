@@ -2,10 +2,13 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <title>Commande Carte NFC - SparkLink</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commande de Carte NFC - SparkLink</title>
+    <link rel="stylesheet" href="https://paytech.sn/cdn/paytech.min.css">
+    <script src="https://paytech.sn/cdn/paytech.min.js"></script>
     <style>
-        /* Styles de base conservés */
+        *, *::before, *::after { box-sizing: border-box; }
+
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #2a538b;
@@ -15,76 +18,30 @@
             display: flex;
             align-items: center;
             height: 100vh;
-            
         }
 
         form {
-    background-color: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-    margin: 20px auto;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
-}
-
-/* Petits écrans (téléphones) */
-@media (max-width: 480px) {
-    form {
-        padding: 15px;
-    }
-}
-
-/* Écrans moyens (tablettes) */
-@media (min-width: 481px) and (max-width: 768px) {
-    form {
-        padding: 20px;
-    }
-}
-
-/* Grands écrans (ordinateurs) */
-@media (min-width: 769px) {
-    form {
-        width: 500px;
-    }
-}
-
-
-        .form-section {
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-        }
-
-        h3.section-title {
-            color: #2a538b;
-            margin-top: 0;
-            font-size: 1.2em;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         label {
             display: block;
             margin: 15px 0 5px;
             color: #333;
-            font-weight: 500;
         }
 
-        input, select, textarea {
+        input, select {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             font-size: 14px;
-        }
-
-        .social-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            margin-bottom: 10px;
         }
 
         button {
@@ -99,332 +56,145 @@
             transition: background-color 0.3s;
         }
 
-        button:hover {
-            background-color: #1a3a6b;
+        button[disabled] {
+            background-color: #aaa;
+            cursor: not-allowed;
         }
 
-        #confirmation {
-            /* Styles existants conservés */
+        .loader {
+            display: none;
+            margin: 10px auto;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2a538b;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
         }
 
-        .payment-info {
-            background-color: #e8f4ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .d-none{
-            display: none !important;
-        }
-        .logo {
-            width: 200px;
-        }
-        .title{
-            width: 100%;
-            text-align: center;
-        }
-        .subtitle{
-            color: gray;
-            opacity: 0.5;
-            font-size: 9px;
-        }
-        form:not(#nfcForm) {
-            display: none !important;
-        }
-
     </style>
-    <!-- Script TouchPay -->
-    <script src="https://touchpay.gutouch.net/touchpayv2/script/touchpaynr/prod_touchpay-0.0.1.js"></script>
 </head>
 <body>
-    <form id="nfcForm">
-        <div class="title">
-         <img src="https://i.postimg.cc/cxt285nG/logo.jpg" class="logo" alt="">
-         <h4 class="subtitle">un produit de Sparklink Business club</h4>
-        </div>
-        <div class="form-section">
 
-         <span class="d-none">
-            <h3 class="section-title">Informations Personnelles</h3>
-            
-            <label for="fullName">Nom Complet :</label>
-            <input type="text" id="fullName" name="fullName" required>
-            
-            <label for="jobTitle">Fonction/Poste :</label>
-            <input type="text" id="jobTitle" name="jobTitle" required>
-            
-            <label for="company">Entreprise/Organisation :</label>
-            <input type="text" id="company" name="company" required>
-            
-            <label for="email">Email Professionnel :</label>
-            <input type="email" id="email" name="email" required>
-        </span>
+<form id="nfcForm">
+    <h2 style="text-align:center;">Carte NFC</h2>
 
-            <label for="pattern">Motif :</label>
-            <input type="text" placeholder="Badge événementiel avec nom, rôle et log" id="pattern" name="pattern" required>
-            
-            <label for="phone">Téléphone:</label>
-            <input type="tel" placeholder="77 663 38 82" id="phone" name="phone" required>
+    <label for="fullName">Nom Complet (Prénom Nom) :</label>
+    <input type="text" id="fullName" placeholder="ex: Jean Dupont">
 
-            <label for="amount">Montant (XOF):</label>
-            <input type="number" placeholder="1000" id="amount" name="amount" required>
+    <label for="pattern">Motif :</label>
+    <select id="pattern">
+        <option value="" disabled selected>-- Sélectionner un motif --</option>
+        <option value="Badge">Badge</option>
+        <option value="Carte">Carte</option>
+    </select>
 
-        </div>
+    <label for="phone">Téléphone :</label>
+    <input type="tel" id="phone" placeholder="772457199">
 
-        <div class="form-section d-none">
-            <h3 class="section-title">Réseaux Sociaux</h3>
-            <div class="social-grid">
-                <div>
-                    <label for="linkedin">LinkedIn :</label>
-                    <input type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/votreprofil">
-                </div>
-                <div>
-                    <label for="instagram">Instagram :</label>
-                    <input type="url" id="instagram" name="instagram" placeholder="https://instagram.com/votreprofil">
-                </div>
-                <div>
-                    <label for="twitter">Twitter/X :</label>
-                    <input type="url" id="twitter" name="twitter" placeholder="https://x.com/votreprofil">
-                </div>
-                <div>
-                    <label for="tiktok">TikTok :</label>
-                    <input type="url" id="tiktok" name="tiktok" placeholder="https://tiktok.com/@votreprofil">
-                </div>
-            </div>
-        </div>
+    <label for="amount">Montant (XOF) :</label>
+    <input type="number" id="amount" placeholder="5000">
 
-        <div class="form-section d-none">
-            <h3 class="section-title">Personnalisation</h3>
-            
-            <label for="website">Site Web :</label>
-            <input type="url" id="website" name="website" placeholder="https://votresite.com">
-            
-            <label for="cardDesign">Style de Carte :</label>
-            <select id="cardDesign" name="cardDesign">
-                <option value="classic">Classique</option>
-                <option value="modern">Moderne</option>
-                <option value="premium">Premium</option>
-            </select>
-            
-            <label for="comments">Instructions Spéciales :</label>
-            <textarea id="comments" name="comments" rows="4" placeholder="Informations complémentaires pour la personnalisation..."></textarea>
-        </div>
+    <label for="tp">Moyen de paiement :</label>
+    <select id="tp">
+        <option value="" disabled selected>-- Sélectionner --</option>
+        <option value="Orange Money">Orange Money</option>
+        <option value="Wave">Wave</option>
+        <option value="Tigo Cash">Free Money Mix by Yass</option>
+        <option value="Wizall">Wizall</option>
+        <option value="Carte Bancaire">Carte Bancaire</option>
+    </select>
 
-        <div class="payment-info">
-            <h3 class="d-none">Paiement Sécurisé</h3>
-            <p class="d-none">Prix total : <strong class="amount-text">5 000 XOF</strong></p>
-            <button type="button" onclick="validateAndPay()">Payer et Commander</button>
-        </div>
-    </form>
+    <div class="loader" id="loader"></div>
 
-    <div id="confirmation" class="d-none">
-        <p>Commande validée ! Votre carte est en préparation.</p>
-        <p>ID Transaction: <span id="transactionId"></span></p>
-        <button type="button" onclick="closeConfirmation()">Fermer</button>
-    </div>
+    <button type="button" onclick="validateAndPay()" id="payBtn">Payer et Commander</button>
+</form>
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script>
+<script>
+    const PAYTECH_JSONP_URL = 'https://script.google.com/macros/s/AKfycbyly7xozHbeDrw9s3IQhcZpDj-MQwLGM47MweZ9KRx4p4jJ9NB37xDn3D05nzuDDuQb2w/exec';
 
-       function xorder_id() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let orderId = '';
-            for (let i = 0; i < 6; i++) {
-                orderId += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return orderId;
-        }
+    function validateAndPay() {
+        setTimeout(() => {
+            const btn = document.getElementById("payBtn");
+            const loader = document.getElementById("loader");
 
-        function xdate() {
-            const now = new Date();
-            
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0
-            const year = now.getFullYear();
-            
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            
-            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-        }
-
-        // api data to add data related to the first step payment
-        // data realted to the first step: amount, client_phone, order_Id, date
-        
-        const S1_API_URL = 'https://script.google.com/macros/s/AKfycbwI_gQOoPlhAgl7SaP-s7C5ZFLQm8brRe1ErNDxJQp64WVxhWCuXq3W8S_sCQsIJczm/exec';
-        const S1_SECRET_KEY = '?i_Ke:Zqv%hL3ML/m!8|ayqJPf{(!,VGr$[o|W5&&KbuEFqgeda~H-sa';
-
-        let transactionId = 'SPARK-' + Date.now();
-        let callback = 'https://gladys862.github.io/FlashPay/';
-        let secure_code = 'QWCRU6qkjB6BEN7LlAEGFL9cOG9PPkQztmmdv81rgNzPfjQbji';
-        let agency_code = 'STAMI25753';
-        let domain_name = 'stamina.sn';
-        let fallback = 'https://gladys862.github.io/FlashPay/';
-        let city = 'Dakar';
-        let email = '';
-        let client_last_name = '';
-        let client_first_name = '';
-        
-
-        // 
-        let order_id = xorder_id();
-        let date = xdate();
-
-    </script>
-    <script>
-        emailjs.init("jDP_quiL9Ze-wptPf");
-
-        function validateAndPay() {
-            if (validateForm()) { 
-                
-                xpay();
-            }
-        }
-
-
-
-
-
-
-     
-
-    function validateForm() {
-        const requiredFields = ['amount', 'phone', 'pattern']; // Ajoute d'autres champs si nécessaire
-        let isValid = true;
-
-        requiredFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (!field.value.trim()) {
-                field.style.borderColor = 'red';
-                isValid = false;
-            } else {
-                field.style.borderColor = '#ddd';
-            }
-        });
-
-        return isValid;
-    }
-
-    function xpay(){
-        let client_phone = document.getElementById('phone').value;
-        let amount = document.getElementById('amount').value;
-        let pattern = document.getElementById('pattern').value;
-        sendDataToSheet(amount, client_phone, order_id, date, transactionId, pattern); // Envoie les données à Google Sheets
-        sendPaymentInfos(transactionId, agency_code, secure_code, domain_name, callback, fallback, amount, city, email, client_first_name, client_last_name, client_phone);
-    }
-
-    function sendDataToSheet(amount, clientPhone, orderId, date, transactionId, pattern) {
-        const url = S1_API_URL;  // L'URL de ton Web App
-        const token = S1_SECRET_KEY;  // Le token secret
-        
-        const data = {
-            amount: amount,
-            clientPhone: clientPhone,
-            orderId: orderId,
-            date: date,
-            transactionId : transactionId,
-            pattern: pattern,
-            token: token  // Inclut le token secret
-        };
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(data)
-        })
-        .then(response => response.text())
-        .then(data => {
-            console.log('Réponse du serveur:', data);
-            alert('Données mises à jour avec succès !');
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Erreur lors de la mise à jour des données.');
-        });
-    }
-
-
-
-
-     
-
-        function handlePaymentSuccess(paymentData) {
-            //document.getElementById('transactionId').textContent = paymentData.transactionId;
-            // document.getElementById('confirmation').style.display = 'block';
-            sendOrderToTeam();
-        }
-
-        function sendOrderToTeam() {
-            const orderDetails = {
-                name: document.getElementById('fullName').value,
-                company: document.getElementById('company').value,
-                contacts: {
-                    email: document.getElementById('email').value,
-                    phone: document.getElementById('phone').value,
-                    linkedin: document.getElementById('linkedin').value,
-                    instagram: document.getElementById('instagram').value
-                },
-                design: document.getElementById('cardDesign').value,
-                specialInstructions: document.getElementById('comments').value,
-                paymentDate: new Date().toLocaleString()
+            const fields = {
+                "Nom complet": document.getElementById("fullName").value.trim(),
+                "Motif": document.getElementById("pattern").value,
+                "Téléphone": document.getElementById("phone").value.trim(),
+                "Montant": document.getElementById("amount").value.trim(),
+                "Moyen de paiement": document.getElementById("tp").value
             };
 
-            emailjs.send("service_sk94iy5", "template_5nj69vm", {
-                ...orderDetails,
-                to_email: "sparklink@sparklink.club",
-                subject: "Nouvelle commande de carte NFC - " + orderDetails.name
-            });
-        }
+            const missing = [];
 
-        function closeConfirmation() {
-            document.getElementById('nfcForm').reset();
-        }
-        
-    </script>
-        <script>
-        // Fonction pour récupérer tous les paramètres de l'URL
-        function getAllURLParameters() {
-            let params = new URLSearchParams(window.location.search);
-            let allParams = {};
-            for (let [key, value] of params) {
-                allParams[key] = value; // Ajouter chaque paramètre à l'objet allParams
+            for (const [label, value] of Object.entries(fields)) {
+                if (!value) {
+                    missing.push(label);
+                }
             }
-            return allParams;
+
+            if (missing.length > 0) {
+                alert("Veuillez remplir les champs suivants :\n- " + missing.join("\n- "));
+                return;
+            }
+
+            const phone = fields["Téléphone"];
+            const fullName = fields["Nom complet"];
+            const phoneValid = /^7[05678]\d{7}$/.test(phone);
+            const nameValid = /^[^\d\s]+ [^\d\s]+$/.test(fullName);
+
+            if (!phoneValid) {
+                alert("Numéro invalide. Format attendu : 772457199");
+                return;
+            }
+
+            if (!nameValid) {
+                alert("Nom complet invalide. Format : Prénom Nom");
+                return;
+            }
+
+            // UI
+            btn.disabled = true;
+            loader.style.display = "block";
+
+            const motif = fields["Motif"];
+            const montant = fields["Montant"];
+            const tp = fields["Moyen de paiement"];
+
+            const callback = "handlePayTechResponse";
+            const url = `${PAYTECH_JSONP_URL}?motif=${encodeURIComponent(motif)}&montant=${montant}&telephone=${phone}&full_name=${encodeURIComponent(fullName)}&tp=${encodeURIComponent(tp)}&callback=${callback}`;
+
+            const script = document.createElement("script");
+            script.src = url;
+            document.body.appendChild(script);
+        }, 0);
+    }
+
+    function handlePayTechResponse(response) {
+        const btn = document.getElementById("payBtn");
+        const loader = document.getElementById("loader");
+
+        loader.style.display = "none";
+        btn.disabled = false;
+
+        console.log(response);
+
+        if (response.success === 1 && response.redirect_url) {
+            new PayTech({}).withOption({
+                tokenUrl: response.redirect_url,
+                prensentationMode: PayTech.OPEN_IN_POPUP
+            }).send();
+        } else {
+            alert("Erreur PayTech: " + (response.error || "inconnue"));
+            console.error(response);
         }
+    }
+</script>
 
-        // Fonction pour envoyer tous les paramètres à Google Apps Script via une requête GET
-        function sendGetToAppScript() {
-            let params = getAllURLParameters();
-
-            // Construire l'URL de la requête avec tous les paramètres
-            let url = 'https://script.google.com/macros/s/AKfycbwEp9F9SIz8fxUjtDNAgufoNe-6COGrYz_CnzXHEdgnpszDeBufytRVNjo0k6VUWkLH/exec?';
-            let queryParams = new URLSearchParams(params).toString();
-            url += queryParams;
-
-            // Envoyer la requête GET
-            fetch(url)
-                .then(response => response.json())  // Récupérer la réponse en JSON
-                .then(data => {
-                    console.log("Réponse de l'App Script:", data);  // Affiche la réponse dans la console
-                    // Traiter la réponse ici, par exemple afficher un message ou effectuer une action
-                    alert("Réponse reçue: " + JSON.stringify(data));
-                })
-                .catch(error => {
-                    console.error("Erreur lors de l'appel à App Script:", error);
-                });
-
-            // Supprimer les paramètres de l'URL
-            let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-            window.history.pushState({ path: newUrl }, '', newUrl); // Mettre à jour l'URL sans les paramètres
-        }
-
-        // Lorsque la page est chargée, envoyer la requête
-        window.onload = function() {
-            sendGetToAppScript();
-        };
-    </script>
 </body>
 </html>
